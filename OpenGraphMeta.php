@@ -36,7 +36,7 @@ function efSetMainImagePF( $parser, $mainimage ) {
 	if ( isset($parserOutput->eHasMainImageAlready) && $parserOutput->eHasMainImageAlready )
 		return $mainimage;
 	$file = Title::newFromText( $mainimage, NS_FILE );
-	$parserOutput->addOutputHook( 'setmainimage', array( 'dbkey' => $file->getDBkey() ) );
+	$parserOutput->addOutputHook( 'setmainimage', array( 'dbkey' => $file->getPrefixedDBkey() ) ); // haleyjd: must use prefixed db key
 	$parserOutput->eHasMainImageAlready = true;
 
 	return $mainimage;
@@ -44,7 +44,7 @@ function efSetMainImagePF( $parser, $mainimage ) {
 
 $wgParserOutputHooks['setmainimage'] = 'efSetMainImagePH';
 function efSetMainImagePH( $out, $parserOutput, $data ) {
-	$out->mMainImage = wfFindFile( Title::newFromDBkey($data['dbkey'], NS_FILE) );
+	$out->mMainImage = wfFindFile( Title::newFromDBkey($data['dbkey']) ); // haleyjd: newFromDBkey uses prefixed db key
 }
 
 $wgHooks['BeforePageDisplay'][] = 'efOpenGraphMetaPageHook';
@@ -73,7 +73,7 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 
 	if ( isset( $out->mMainImage ) && ( $out->mMainImage !== false ) ) {
 		if( is_object( $out->mMainImage ) ){
-			$meta["og:image"] = wfExpandUrl($out->mMainImage->createThumb(100*3, 100));
+			$meta["og:image"] = wfExpandUrl($out->mMainImage->createThumb(320, -1)); // haleyjd: 320 minimum width; height default.
 		} else {
 			// In some edge-cases we won't have defined an object but rather a full URL.
 			$meta["og:image"] = $out->mMainImage;
@@ -97,7 +97,7 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 			if ( isset( OutputPage::$metaAttrPrefixes ) && isset( OutputPage::$metaAttrPrefixes['property'] ) ) {
 				$out->addMeta( "property:$property", $value );
 			} else {
-				$out->addHeadItem("meta:property:$property", "	".Html::element( 'meta', array( 'property' => $property, 'content' => $value ) )."\n");
+				$out->addHeadItem("meta:property:$property", Html::element( 'meta', array( 'property' => $property, 'content' => $value ) ) ); // haleyjd: rem unnecessary whitespace
 			}
 		}
 	}
