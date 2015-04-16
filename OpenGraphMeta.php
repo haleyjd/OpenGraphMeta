@@ -14,7 +14,7 @@ if ( !defined( 'MEDIAWIKI' ) ) die( "This is an extension to the MediaWiki packa
 $wgExtensionCredits['parserhook'][] = array(
 	'path' => __FILE__,
 	'name' => "OpenGraphMeta",
-	'author' => "[http://danf.ca/mw/ Daniel Friesen]",
+	'author' => array("[http://danf.ca/mw/ Daniel Friesen]", "[http://doomwiki.org/wiki/User:Quasar James Haley]"),
 	'descriptionmsg' => 'opengraphmeta-desc',
 	'url' => 'https://www.mediawiki.org/wiki/Extension:OpenGraphMeta',
 	'license-name' => 'GPL-2.0+',
