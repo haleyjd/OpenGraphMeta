@@ -47,6 +47,56 @@ function efSetMainImagePH( $out, $parserOutput, $data ) {
 	$out->mMainImage = wfFindFile( Title::newFromDBkey($data['dbkey']) ); // haleyjd: newFromDBkey uses prefixed db key
 }
 
+// haleyjd: PageImages integration; some credit due to wikia for ideas.
+$wgHooks['PageContentSaveComplete'][] = 'OpenGraphMetaPageImage::onPageContentSaveComplete';
+class OpenGraphMetaPageImage
+{
+	const MAX_WIDTH = 1500;
+	
+	// Get a thumbnail URL if the image is larger than the maximum recommended
+	// size for og:image; otherwise, return the full file URL
+	public static function getThumbUrl( $file ) {
+		$url = false;
+		if( is_object( $file ) ) {
+			$width = $file->getWidth();
+			if ( $width > self::MAX_WIDTH ) {
+				$url = wfExpandUrl( $file->createThumb( self::MAX_WIDTH, -1 ) );
+			} else {
+				$url = $file->getFullUrl();
+			}
+		} else {
+			// In some edge-cases we won't have defined an object but rather a full URL.
+			$url = $file;
+		}
+		return $url;
+	}
+	
+	// Obtain the PageImages extension's opinion of the best page image
+	public static function getPageImage( &$meta, $title ) {
+		$cache = wfGetMainCache();
+		$cacheKey = wfMemcKey( 'OpenGraphMetaPageImage', md5( $title->getDBkey() ) );
+		$imageUrl = $cache->get( $cacheKey );
+		if ( is_null($imageUrl) || $imageUrl === false ) {
+			$imageUrl = '';
+			$file = PageImages::getPageImage( $title );
+			if( $file ) {
+				$imageUrl = self::getThumbUrl( $file );
+			}
+			$cache->set( $cacheKey, $imageUrl );
+		}
+		if( !empty( $imageUrl ) ) {
+			$meta["og:image"] = $imageUrl;
+		}
+	}
+	
+	// Hook function to delete cached PageImages result when an article is edited
+	public static function onPageContentSaveComplete( $article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId ) {
+		$title = $article->getTitle();
+		$cacheKey = wfMemcKey( 'OpenGraphMetaPageImage', md5( $title->getDBkey() ) );
+		wfGetMainCache()->delete( $cacheKey );
+	}
+}
+
 $wgHooks['BeforePageDisplay'][] = 'efOpenGraphMetaPageHook';
 function efOpenGraphMetaPageHook( &$out, &$sk ) {
 	global $wgLogo, $wgSitename, $wgXhtmlNamespaces, $egFacebookAppId, $egFacebookAdmins;
@@ -72,14 +122,11 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 	}
 
 	if ( isset( $out->mMainImage ) && ( $out->mMainImage !== false ) ) {
-		if( is_object( $out->mMainImage ) ){
-			$meta["og:image"] = wfExpandUrl($out->mMainImage->createThumb(320, -1)); // haleyjd: 320 minimum width; height default.
-		} else {
-			// In some edge-cases we won't have defined an object but rather a full URL.
-			$meta["og:image"] = $out->mMainImage;
-		}
+		$meta["og:image"] = OpenGraphMetaPageImage::getThumbUrl( $out->mMainImage );
 	} elseif ( $isMainpage ) {
 		$meta["og:image"] = wfExpandUrl($wgLogo);
+	} elseif ( defined('PAGE_IMAGES_INSTALLED') ) { // haleyjd: integrate with Extension:PageImages
+		OpenGraphMetaPageImage::getPageImage( $meta, $title );
 	}
 	if ( isset($out->mDescription) ) { // set by Description2 extension, install it if you want proper og:description support
 		$meta["og:description"] = $out->mDescription;
