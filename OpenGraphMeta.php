@@ -94,6 +94,7 @@ class OpenGraphMetaPageImage
 		$title = $article->getTitle();
 		$cacheKey = wfMemcKey( 'OpenGraphMetaPageImage', md5( $title->getDBkey() ) );
 		wfGetMainCache()->delete( $cacheKey );
+		return true;
 	}
 }
 
