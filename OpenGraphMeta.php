@@ -48,10 +48,22 @@ function efSetMainImagePH( $out, $parserOutput, $data ) {
 }
 
 // haleyjd: PageImages integration; some credit due to wikia for ideas.
+$egOpenGraphMetaMimeBlacklist = array( 'unknown/unknown', 'text/plain' );
 $wgHooks['PageContentSaveComplete'][] = 'OpenGraphMetaPageImage::onPageContentSaveComplete';
 class OpenGraphMetaPageImage
 {
 	const MAX_WIDTH = 1500;
+
+	// Check if a file is a suitable image; not all files are images.
+	public static function isAllowedThumb( $file ) {
+		global $egOpenGraphMetaMimeBlacklist;
+		if( is_object( $file ) ) {
+			if( in_array( $file->getMimeType(), $egOpenGraphMetaMimeBlacklist ) ) {
+				return false;
+			}
+		}
+		return true; // is allowed, or cannot discern MIME type in this context.
+	}
 
 	// Get a thumbnail URL if the image is larger than the maximum recommended
 	// size for og:image; otherwise, return the full file URL
@@ -79,7 +91,7 @@ class OpenGraphMetaPageImage
 		if ( is_null($imageUrl) || $imageUrl === false ) {
 			$imageUrl = '';
 			$file = PageImages::getPageImage( $title );
-			if( $file ) {
+			if( $file && self::isAllowedThumb( $file ) ) {
 				$imageUrl = self::getThumbUrl( $file );
 			}
 			$cache->set( $cacheKey, $imageUrl );
@@ -128,7 +140,7 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 		$meta["og:image"] = wfExpandUrl($wgLogo);
 	} elseif ( $title->inNamespace( NS_FILE ) ) { // haleyjd: NS_FILE is trivial
 		$file = wfFindFile( $title->getDBkey() );
-		if ( $file ) {
+		if ( $file && OpenGraphMetaPageImage::isAllowedThumb( $file ) ) {
 			$meta["og:image"] = OpenGraphMetaPageImage::getThumbUrl( $file );
 		}
 	} elseif ( defined('PAGE_IMAGES_INSTALLED') ) { // haleyjd: integrate with Extension:PageImages
