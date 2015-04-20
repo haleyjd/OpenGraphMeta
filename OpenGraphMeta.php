@@ -52,7 +52,7 @@ $wgHooks['PageContentSaveComplete'][] = 'OpenGraphMetaPageImage::onPageContentSa
 class OpenGraphMetaPageImage
 {
 	const MAX_WIDTH = 1500;
-	
+
 	// Get a thumbnail URL if the image is larger than the maximum recommended
 	// size for og:image; otherwise, return the full file URL
 	public static function getThumbUrl( $file ) {
@@ -70,7 +70,7 @@ class OpenGraphMetaPageImage
 		}
 		return $url;
 	}
-	
+
 	// Obtain the PageImages extension's opinion of the best page image
 	public static function getPageImage( &$meta, $title ) {
 		$cache = wfGetMainCache();
@@ -88,7 +88,7 @@ class OpenGraphMetaPageImage
 			$meta["og:image"] = $imageUrl;
 		}
 	}
-	
+
 	// Hook function to delete cached PageImages result when an article is edited
 	public static function onPageContentSaveComplete( $article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId ) {
 		$title = $article->getTitle();
@@ -126,6 +126,11 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 		$meta["og:image"] = OpenGraphMetaPageImage::getThumbUrl( $out->mMainImage );
 	} elseif ( $isMainpage ) {
 		$meta["og:image"] = wfExpandUrl($wgLogo);
+	} elseif ( $title->inNamespace( NS_FILE ) ) { // haleyjd: NS_FILE is trivial
+		$file = wfFindFile( $title->getDBkey() );
+		if ( $file ) {
+			$meta["og:image"] = OpenGraphMetaPageImage::getThumbUrl( $file );
+		}
 	} elseif ( defined('PAGE_IMAGES_INSTALLED') ) { // haleyjd: integrate with Extension:PageImages
 		OpenGraphMetaPageImage::getPageImage( $meta, $title );
 	}
