@@ -275,7 +275,7 @@ class OpenGraphMetaSEO
 	 */
 	public static function parseKeywordsTag(Parser $parser, $frame, $content) {
 		if (empty($content)) {
-			return wfMessage('seo_keywords_missing')->inContentLanguage()->plain();
+			return wfMessage('seo-keywords-missing')->inContentLanguage()->plain();
 		}
 		
 		$out = $parser->getOutput();
