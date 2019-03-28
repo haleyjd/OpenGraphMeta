@@ -282,6 +282,11 @@ class OpenGraphMetaSEO
 		$out->setProperty('keywords', $content);
 	}
 	
+	public static function getDefaultKeywords() {
+		$plain = 
+		
+	}
+	
 	/**
 	 * Adds keywords attributes to HTML
 	 *
@@ -294,7 +299,11 @@ class OpenGraphMetaSEO
 		if (!isset($out->mKeywords)) {
 			$out->mKeywords = array();
 		}
-		$out->mKeywords = array_map("trim", explode(',', $parserOutput->getProperty('keywords')));
+		$keywords = $parserOutput->getProperty('keywords');
+		if (empty($keywords)) {
+			$keywords = wfMessage('seo-default-keywords')->inContentLanguage()->plain();
+		}
+		$out->mKeywords = array_map("trim", explode(',', $keywords));
 	}
 	
 	/**
@@ -374,4 +383,3 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 $egFacebookAppId = null;
 $egFacebookAdmins = null;
 $egSocialSettings = array();
-
