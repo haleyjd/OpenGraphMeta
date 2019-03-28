@@ -385,4 +385,4 @@ function efOpenGraphMetaPageHook( &$out, &$sk ) {
 
 $egFacebookAppId = null;
 $egFacebookAdmins = null;
-$egSocialSettings = array();
+$egSocialSettings = array('profile_urls' => '');
