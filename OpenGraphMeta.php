@@ -282,11 +282,6 @@ class OpenGraphMetaSEO
 		$out->setProperty('keywords', $content);
 	}
 	
-	public static function getDefaultKeywords() {
-		$plain = 
-		
-	}
-	
 	/**
 	 * Adds keywords attributes to HTML
 	 *
