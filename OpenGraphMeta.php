@@ -207,6 +207,10 @@ class OpenGraphMetaSEO
 			} else {
 				$profiles = '';
 			}
+			
+			if (!isset($meta['og:image'])) {
+				$meta['og:image'] = $image;
+			}
 
 			$ldJson = '
 <script type="application/ld+json">
