@@ -202,7 +202,11 @@ class OpenGraphMetaSEO
 			$search = $searchPage->getFullUrl(['search' => 'search_term'], false, PROTO_HTTPS);
 			$search = str_replace('search_term', '{search_term}', $search);
 
-			$profiles = '"'.implode('", "', $egSocialSettings['profile_urls']).'"';
+			if (isset($egSocialSettings['profile_urls'])) {
+				$profiles = '"'.implode('", "', $egSocialSettings['profile_urls']).'"';
+			} else {
+				$profiles = '';
+			}
 
 			$ldJson = '
 <script type="application/ld+json">
