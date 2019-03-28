@@ -221,7 +221,7 @@ class OpenGraphMetaSEO
 	"headline": "'.$template->get('title').'",
 	"image": {
 		"@type": "ImageObject",
-		"url": "'.$meta['og:image'].'",
+		"url": "'.$meta['og:image'].'"
 	},
 	"author": {
 		"@type": "Organization",
