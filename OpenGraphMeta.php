@@ -211,14 +211,16 @@ class OpenGraphMetaSEO
 			if (!isset($meta['og:image'])) {
 				$meta['og:image'] = $image;
 			}
+			
+			$title = json_encode($template->get('title'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 			$ldJson = '
 <script type="application/ld+json">
 {
 	"@context": "http://schema.org/",
 	"@type": "Article",
-	"name": "'.$template->get('title').'",
-	"headline": "'.$template->get('title').'",
+	"name": "'.$title.'",
+	"headline": "'.$title.'",
 	"image": {
 		"@type": "ImageObject",
 		"url": "'.$meta['og:image'].'"
