@@ -219,8 +219,8 @@ class OpenGraphMetaSEO
 {
 	"@context": "http://schema.org/",
 	"@type": "Article",
-	"name": "'.$title.'",
-	"headline": "'.$title.'",
+	"name": '.$title.',
+	"headline": '.$title.',
 	"image": {
 		"@type": "ImageObject",
 		"url": "'.$meta['og:image'].'"
